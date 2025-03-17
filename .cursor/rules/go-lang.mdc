@@ -1,0 +1,101 @@
+---
+description: Golang general guidelines
+globs: 
+alwaysApply: true
+---
+# Golang General Guidelines
+
+## Code Organization
+
+- **Package Names**: Use short, lowercase, single-word names without underscores or mixedCaps
+- **File Names**: Should be lowercase and use underscores to separate words if needed
+- **Directory Structure**: Organize code by functionality, not by type
+- **Project Layout**: Follow the [Standard Go Project Layout](https://github.com/golang-standards/project-layout) for consistency
+
+## Formatting
+
+- **Use `gofmt`**: Always run `gofmt` or `go fmt` on your code before committing
+- **Line Length**: Aim for 80 characters, but no hard limit (readability is key)
+- **Indentation**: Use tabs for indentation (Go's standard)
+- **Braces**: Opening braces should be on the same line as control statements
+
+## Naming Conventions
+
+- **Variable Names**: Use camelCase for internal variables, PascalCase for exported ones
+- **Constant Names**: Follow same conventions as variables
+- **Interface Names**: Single-method interfaces should be named by the method name plus 'er' (e.g., `Reader` for `Read()`)
+- **Error Names**: Prefix with 'Err' or suffix with 'Error'
+
+## Error Handling
+
+- **Check Errors**: Always check error returns, don't ignore them
+- **Return Early**: Use early returns rather than nested if statements
+- **Custom Errors**: Use `errors.New()` or `fmt.Errorf()` for simple errors, custom types for complex ones
+- **Don't Panic**: Avoid `panic()` in production code; return errors instead
+
+## Concurrency
+
+- **Use Goroutines Carefully**: Don't create goroutines in libraries where callers can't control them
+- **Always Clean Up**: Ensure goroutines terminate, even during errors
+- **Prefer Channels**: Use channels for communication between goroutines
+- **Context Usage**: Use `context.Context` for cancellation and deadlines
+
+## Structs and Interfaces
+
+- **Follow SOLID Principles**: Single responsibility, Open-closed, Liskov substitution, Interface segregation, Dependency inversion
+- **Favor Composition Over Inheritance**: Use embedding to reuse code instead of traditional inheritance
+- **Interface Usage**: Use interfaces to define contracts, but avoid unnecessary abstraction
+- **Keep Structs Small and Focused**:
+  - Aim for fewer than 10 fields where possible
+  - Limit the number of exported methods
+  - Use method receivers (`func (s *Struct) Method()`) when mutation is required
+  - Use value receivers when no mutation is needed
+
+## Performance
+
+- **Avoid Premature Optimization**: Focus on correct, readable code first
+- **Benchmark**: Use Go's benchmarking tools to identify bottlenecks
+- **Memory Allocation**: Minimize allocations by reusing objects, especially in hot paths
+- **Slices and Maps**: Pre-allocate with make() when you know the size
+
+## Testing
+
+- **Table-Driven Tests**: Prefer table-driven tests for multiple test cases
+- **Test Coverage**: Aim for high test coverage, especially for critical code
+- **Benchmark Tests**: Write benchmark tests for performance-sensitive code
+- **Use Subtests**: Organize tests using `t.Run()` with descriptive names
+
+## Documentation
+
+- **Example Code**: Include examples in documentation when useful
+- **Package Documentation**: Provide overview documentation in package-level comments
+- **Use `godoc` Conventions**: Follow standard format for doc comments
+
+## Dependencies
+
+- **Minimize Dependencies**: Keep external dependencies to a minimum
+- **Vendoring**: Consider vendoring dependencies for reproducible builds
+- **Go Modules**: Use Go modules for dependency management
+- **Version Pinning**: Pin dependency versions for stability
+
+## Common Gotchas
+
+- **Nil Slices vs Empty Slices**: `nil` slice and empty slice behave differently in marshaling
+- **Range Variable Capture**: Variables in `for` loops are reused; take care when capturing
+- **Map Iteration Order**: Maps iterate in random order
+- **Pointer vs Value Methods**: Be consistent about receiver types
+- **Slice Capacity**: Be aware of underlying array sharing when reslicing
+
+## Tools
+
+- **Go Vet**: Run `go vet` regularly to find potential bugs
+- **Golint**: Use linters like `golint` or `golangci-lint` for style checking
+- **Staticcheck**: Use static analysis tools to catch common mistakes
+- **Delve**: Use `delve` for debugging
+
+## Recommended Resources
+
+- [Effective Go](https://golang.org/doc/effective_go)
+- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+- [Go Proverbs](https://go-proverbs.github.io/)
+- [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md)# Golang General Guidelines
