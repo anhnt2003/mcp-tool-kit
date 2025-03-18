@@ -25,5 +25,9 @@ func main() {
 		if tool == "jira" {
 			tools.NewJiraTool(server)
 		}
+		
+		if tool == "sql-server" {
+			tools.NewSQLServerTool(server)
+		}
 	}
 } 

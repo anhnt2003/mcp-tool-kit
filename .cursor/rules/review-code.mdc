@@ -1,0 +1,186 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Code Review Guidelines
+
+## General Principles
+
+- **Be Constructive**: Focus on improving code quality while maintaining a positive and professional tone
+- **Be Specific**: Provide clear, actionable feedback with examples when possible
+- **Be Timely**: Review code promptly to maintain project momentum
+- **Be Thorough**: Check both functionality and code quality aspects
+
+## Code Review Checklist
+
+### 1. Code Quality
+- [ ] Code follows project coding standards and style guides
+- [ ] No duplicate code or unnecessary complexity
+- [ ] Functions and methods are focused and have single responsibility
+- [ ] Variable and function names are clear and descriptive
+- [ ] Comments are meaningful and explain "why" not "what"
+- [ ] No dead code or commented-out code
+- [ ] Error handling is appropriate and comprehensive
+
+### 2. Architecture & Design
+- [ ] Changes align with project architecture
+- [ ] No unnecessary coupling between components
+- [ ] Dependencies are properly managed
+- [ ] Code is modular and reusable
+- [ ] Design patterns are used appropriately
+- [ ] No circular dependencies
+
+### 3. Testing
+- [ ] Unit tests are included for new features
+- [ ] Test coverage is adequate
+- [ ] Tests are meaningful and not just for coverage
+- [ ] Edge cases are covered
+- [ ] Integration tests are added where necessary
+
+### 4. Security
+- [ ] No security vulnerabilities
+- [ ] Input validation is present
+- [ ] Sensitive data is handled appropriately
+- [ ] Authentication and authorization are properly implemented
+- [ ] No hardcoded credentials or secrets
+
+### 5. Performance
+- [ ] No obvious performance issues
+- [ ] Resource usage is optimized
+- [ ] Database queries are efficient
+- [ ] No memory leaks
+- [ ] Scalability is considered
+
+### 6. Documentation
+- [ ] Code is self-documenting
+- [ ] API documentation is updated
+- [ ] README changes are included if needed
+- [ ] Complex logic is explained
+- [ ] Dependencies are documented
+
+### 7. Git Practices
+- [ ] Commit messages are clear and descriptive
+- [ ] Changes are atomic and focused
+- [ ] No merge conflicts
+- [ ] Branch naming follows conventions
+- [ ] Rebase/merge strategy is appropriate
+
+## Review Process
+
+1. **Initial Scan**
+   - Review the overall changes
+   - Check commit messages
+   - Look for obvious issues
+
+2. **Detailed Review**
+   - Examine code changes line by line
+   - Check test coverage
+   - Verify documentation
+
+3. **Final Check**
+   - Ensure all checklist items are addressed
+   - Verify no regressions
+   - Check for any missed edge cases
+
+## Response Guidelines
+
+### When Approving
+- Provide positive feedback for good practices
+- Note any minor suggestions for future improvements
+- Use "LGTM" (Looks Good To Me) when appropriate
+
+### When Requesting Changes
+- Explain why changes are needed
+- Provide specific examples
+- Be clear about required vs. suggested changes
+- Use "Request Changes" for blocking issues
+
+### When Commenting
+- Use inline comments for specific lines
+- Use general comments for broader issues
+- Tag relevant team members when needed
+
+## Common Issues to Watch For
+
+1. **Code Style**
+   - Inconsistent formatting
+   - Poor naming conventions
+   - Missing or excessive comments
+
+2. **Architecture**
+   - Breaking existing patterns
+   - Creating tight coupling
+   - Ignoring separation of concerns
+
+3. **Testing**
+   - Missing test cases
+   - Poor test quality
+   - Inadequate coverage
+
+4. **Security**
+   - Input validation gaps
+   - Authentication issues
+   - Data exposure risks
+
+5. **Performance**
+   - Inefficient algorithms
+   - Resource leaks
+   - Scalability concerns
+
+## Best Practices
+
+1. **Review Size**
+   - Keep reviews under 400 lines of code
+   - Break large changes into smaller PRs
+   - Focus on one feature/fix per PR
+
+2. **Review Timing**
+   - Review within 24 hours
+   - Set expectations for response time
+   - Escalate if review is delayed
+
+3. **Communication**
+   - Be professional and respectful
+   - Use clear and concise language
+   - Provide context for suggestions
+
+4. **Automation**
+   - Use automated tools for style checking
+   - Leverage CI/CD pipelines
+   - Trust but verify automated checks
+
+## Review Tools
+
+1. **Static Analysis**
+   - Linters
+   - Code coverage tools
+   - Security scanners
+
+2. **Code Review Tools**
+   - Pull request templates
+   - Review checklists
+   - Automated testing
+
+3. **Documentation Tools**
+   - Code documentation tools
+   - Architecture diagram tools
+
+## Review Metrics
+
+1. **Quality Metrics**
+   - Code coverage percentage
+   - Number of issues found
+   - Time to resolution
+
+2. **Process Metrics**
+   - Review time
+   - Number of iterations
+   - Resolution rate
+
+3. **Team Metrics**
+   - Review participation
+   - Knowledge sharing
+   - Team collaboration
+
+Remember: The goal of code review is to improve code quality while fostering a collaborative and learning environment.

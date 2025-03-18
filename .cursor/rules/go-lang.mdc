@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: Golang general guidelines
 globs: 
 alwaysApply: true
@@ -10,7 +15,7 @@ alwaysApply: true
 - **Package Names**: Use short, lowercase, single-word names without underscores or mixedCaps
 - **File Names**: Should be lowercase and use underscores to separate words if needed
 - **Directory Structure**: Organize code by functionality, not by type
-- **Project Layout**: Follow the [Standard Go Project Layout](https://github.com/golang-standards/project-layout) for consistency
+- **Project Layout**: Follow the [Standard Go Project Layout](mdc:https:/github.com/golang-standards/project-layout) for consistency
 
 ## Formatting
 
@@ -95,7 +100,7 @@ alwaysApply: true
 
 ## Recommended Resources
 
-- [Effective Go](https://golang.org/doc/effective_go)
-- [Go Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
-- [Go Proverbs](https://go-proverbs.github.io/)
-- [Uber Go Style Guide](https://github.com/uber-go/guide/blob/master/style.md)# Golang General Guidelines
+- [Effective Go](mdc:https:/golang.org/doc/effective_go)
+- [Go Code Review Comments](mdc:https:/github.com/golang/go/wiki/CodeReviewComments)
+- [Go Proverbs](mdc:https:/go-proverbs.github.io)
+- [Uber Go Style Guide](mdc:https:/github.com/uber-go/guide/blob/master/style.md)# Golang General Guidelines
