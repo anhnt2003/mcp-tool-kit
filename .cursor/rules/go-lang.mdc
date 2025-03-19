@@ -1,9 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: false
----
----
 description: Golang general guidelines
 globs: 
 alwaysApply: true

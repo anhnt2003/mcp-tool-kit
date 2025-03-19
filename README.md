@@ -1,34 +1,74 @@
 # MCP Tool Kit
 
-A Go-based MCP (Mission Control Protocol) server implementation using the mark3labs/mcp-go library.
+A collection of tools for the Model-Controller-Presenter (MCP) framework.
+
+## Features
+
+- SQL Server integration for database operations
+- Jira integration for issue tracking
 
 ## Prerequisites
 
-- Go 1.16 or higher
-- Git
+- Go 1.18 or higher
+- Docker for running SQL Server
 
-## Installation
+## Setup
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/mcp-tool-kit.git
-cd mcp-tool-kit
-```
+### SQL Server Setup for macOS
 
-2. Install dependencies:
-```bash
-go mod download
-```
+The project uses SQL Server in a Docker container:
 
-## Running the Server
+1. Make sure Docker is installed and running on your macOS system
+2. Update the credentials in the `.env` file:
+   ```
+   # SQL Server Configuration
+   SQL_SERVER=localhost
+   SQL_PORT=1433
+   SQL_USER=sa
+   SQL_PASSWORD=StrongPassword123!
+   SQL_DATABASE=master
+   
+   # MCP Tools Configuration
+   CONFIG_TOOLS=sql-server
+   ```
 
-To start the MCP server:
+3. Run the application:
+   ```
+   ./run.sh
+   ```
 
-```bash
-go run main.go
-```
+This will:
+- Start SQL Server in a Docker container
+- Configure the SQL Server connection
+- Initialize the MCP server with the SQL Server tools
 
-The server will start and listen for connections. To stop the server, press Ctrl+C.
+### SQL Server Tools
+
+The following SQL Server tools are available:
+
+- `sql_execute_query`: Execute a SQL query
+- `sql_get_tables`: Get a list of all tables in the database
+- `sql_get_table_schema`: Get the schema of a specific table
+- `sql_get_schemas`: Get a list of all schemas in the database
+
+### Troubleshooting
+
+If you encounter connection issues:
+
+1. Make sure Docker is running
+2. Check if the SQL Server container is running: `docker ps | grep mcp-sqlserver`
+3. View container logs: `docker logs mcp-sqlserver`
+4. Verify the connection parameters in the `.env` file
+
+## Development
+
+### Adding New Tools
+
+To add a new tool:
+
+1. Create a new implementation in the `internal/tools` directory
+2. Register the tool in `main.go`
+3. Update the `CONFIG_TOOLS` environment variable to include the new tool
 
 ## Project Structure
 
@@ -38,12 +78,6 @@ mcp-tool-kit/
 ├── go.mod           # Go module definition
 └── README.md        # Project documentation
 ```
-
-## Features
-
-- Basic MCP server implementation
-- Graceful shutdown handling
-- Signal handling for clean termination
 
 ## License
 
