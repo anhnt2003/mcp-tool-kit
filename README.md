@@ -84,118 +84,18 @@ The MCP Tool Kit provides the following SQL Server tools:
 
 Executes a SQL query and returns the results in a formatted table.
 
-**Parameters:**
-- `query`: The SQL query to execute (required)
-
-**Example:**
-```
-sql_execute_query(query="SELECT TOP 10 * FROM Customers")
-```
-
 #### sql_get_tables
 
 Returns a list of all tables in the database.
-
-**Parameters:**
-- None
-
-**Example:**
-```
-sql_get_tables()
-```
 
 #### sql_get_table_schema
 
 Returns the schema of a specific table.
 
-**Parameters:**
-- `table_name`: The name of the table to get the schema for (required)
-
-**Example:**
-```
-sql_get_table_schema(table_name="Customers")
-```
-
 #### sql_get_schemas
 
 Returns a list of all schemas in the database.
 
-**Parameters:**
-- None
-
-**Example:**
-```
-sql_get_schemas()
-```
-
 ### Jira Tools
 
 Documentation for Jira tools will be added soon.
-
-## Troubleshooting
-
-### SQL Server Connection Issues
-
-If you encounter connection issues with SQL Server:
-
-1. Verify that SQL Server is running:
-   - If using Docker: `docker ps | grep mcp-sqlserver`
-   - If using a local instance: Check SQL Server services
-
-2. Check connection parameters:
-   - Ensure environment variables are correctly set
-   - Verify network connectivity to the SQL Server instance
-   - Check firewall settings
-
-3. View logs for more information:
-   - Docker container logs: `docker logs mcp-sqlserver`
-   - Application logs in the console output
-
-4. Common solutions:
-   - Restart the SQL Server container/service
-   - Update connection string parameters
-   - Check for conflicting port usage
-
-## Development
-
-### Project Structure
-
-```
-mcp-tool-kit/
-├── .cursor/             # Documentation directory
-│   └── docs/
-│       └── tools/       # Tool-specific documentation
-├── internal/            # Internal packages
-│   ├── interfaces/      # Interface definitions
-│   └── tools/           # Tool implementations
-├── main.go              # Main server implementation
-├── go.mod               # Go module definition
-├── go.sum               # Go module checksums
-└── README.md            # Project documentation
-```
-
-### Adding New Tools
-
-To add a new tool to the MCP Tool Kit:
-
-1. Create a new implementation in the `internal/tools` directory
-2. Implement the appropriate interface(s) from `internal/interfaces`
-3. Register the tool in `main.go`
-4. Update the `CONFIG_TOOLS` environment variable to include the new tool
-5. Add documentation in the `.cursor/docs/tools` directory
-
-### Database Implementation Guidelines
-
-When implementing database tools:
-
-1. Follow the `Database` interface defined in `internal/interfaces/database.go`
-2. Implement proper error handling and context management
-3. Ensure resource cleanup (connection closing, etc.)
-4. Add appropriate documentation
-
-## Documentation
-
-Detailed documentation for each tool is available in the `.cursor/docs/tools` directory:
-
-- [SQL Server Tool Documentation](.cursor/docs/tools/mssql.md)
-- More tool documentation coming soon

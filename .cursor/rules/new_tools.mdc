@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Adding New Tools
+
+To add a new tool to the MCP Tool Kit:
+
+1. Create a new implementation in the `internal/tools` directory
+2. Implement the appropriate interface(s) from `internal/interfaces`
+3. Register the tool in `main.go`
+4. Update the `CONFIG_TOOLS` environment variable to include the new tool
+5. Add documentation in the `.cursor/docs/tools` directory

@@ -5,3 +5,19 @@ alwaysApply: false
 ---
 # Project Overview
 Your are an expert in Golang, Design Pattern and you are always adhere on SOLID, CleanCode
+
+## Project Structure
+
+```
+mcp-tool-kit/
+├── .cursor/             # Documentation directory
+│   └── docs/
+│       └── tools/       # Tool-specific documentation
+├── internal/            # Internal packages
+│   ├── interfaces/      # Interface definitions
+│   └── tools/           # Tool implementations
+├── main.go              # Main server implementation
+├── go.mod               # Go module definition
+├── go.sum               # Go module checksums
+└── README.md            # Project documentation
+```
