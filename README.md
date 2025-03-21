@@ -66,7 +66,7 @@ If you already have a SQL Server instance running:
 Execute the application using the provided script:
 
 ```bash
-./run.sh
+go run main.go
 ```
 
 This will:
