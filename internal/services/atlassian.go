@@ -7,14 +7,14 @@ import (
 	"github.com/andygrunwald/go-jira"
 )
 
-func InitializeAtlassianClient() *jira.Client {
-	username := os.Getenv("JIRA_USERNAME")
-	token := os.Getenv("JIRA_TOKEN")
+func InitializeAtlassianClient() (*jira.Client) {
+	email := os.Getenv("JIRA_EMAIL")
+	apiKey := os.Getenv("JIRA_API_KEY")
 	jiraURL := os.Getenv("JIRA_URL")
 
 	tp := jira.BasicAuthTransport{
-		Username: username,
-		Password: token,
+		Username: email,
+		Password: apiKey,
 	}
 
 	client, err := jira.NewClient(tp.Client(), jiraURL)
