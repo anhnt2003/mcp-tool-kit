@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -169,13 +170,13 @@ func createConnection() (*sql.DB, error) {
 	database := os.Getenv("SQL_DATABASE")
 	
 	// Connection string format for Microsoft's driver - updated for macOS compatibility
-	connectionString := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s&encrypt=disable&TrustServerCertificate=true", 
-		user, password, server, port, database)
+	connectionString := fmt.Sprintf("Server=%s,%s;User ID=%s;Password=%s;Database=%s;Encrypt=disable;TrustServerCertificate=true", 
+		server, port, user, password, database)
 	
 	fmt.Printf("Connecting to SQL Server with connection string: %s\n", 
 		strings.Replace(connectionString, password, "********", 1))
 	
-	db, err := sql.Open("sqlserver", connectionString)
+	db, err := sql.Open("mssql", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("error connecting to SQL Server: %w", err)
 	}
@@ -197,6 +198,8 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 		fmt.Printf("Failed to initialize SQL Server tool: %v\n", err)
 		return nil
 	}
+
+	fmt.Println("SQL Server tool initialized successfully")
 	
 	// Create a new SQL Server implementation
 	sqlServerTool := &sqlServerImpl{

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -21,6 +22,8 @@ func InitializeAtlassianClient() (*jira.Client) {
 	if err != nil {
 		log.Fatalf("Failed to create Jira client: %v", err)
 	}
+
+	fmt.Println("Jira client created successfully")
 
 	return client
 }
