@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"mcp-tool-kit/internal/interfaces"
 	"os"
 	"strings"
 
@@ -20,14 +21,36 @@ type SQLServer interface {
 	GetSchema(ctx context.Context) ([]string, error)
 }
 
-// sqlServerImpl implements the SQLServer interface
+// sqlServerImpl implements the interfaces.Database interface
 type sqlServerImpl struct {
 	db *sql.DB
 }
 
-// ExecuteQuery executes a SQL query and returns the results
-func (s *sqlServerImpl) ExecuteQuery(ctx context.Context, query string) ([]map[string]any, error) {
-	rows, err := s.db.QueryContext(ctx, query)
+// Connect establishes a connection to the database
+func (s *sqlServerImpl) Connect() error {
+	var err error
+	s.db, err = createConnection()
+	return err
+}
+
+// Disconnect closes the connection to the database
+func (s *sqlServerImpl) Disconnect() error {
+	if s.db != nil {
+		return s.db.Close()
+	}
+	return nil
+}
+
+// Query executes a query and returns results
+func (s *sqlServerImpl) Query(query string, params ...any) ([]map[string]any, error) {
+	ctx := context.Background()
+	
+	// Convert params to a slice of interface{}
+	args := make([]interface{}, len(params))
+	copy(args, params)
+	
+	// Execute the query with parameters
+	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
@@ -83,8 +106,99 @@ func (s *sqlServerImpl) ExecuteQuery(ctx context.Context, query string) ([]map[s
 	return results, nil
 }
 
-// GetTables returns a list of all tables in the database
-func (s *sqlServerImpl) GetTables(ctx context.Context) ([]string, error) {
+// Execute runs a query that doesn't return results (INSERT, UPDATE, DELETE)
+func (s *sqlServerImpl) Execute(query string, params ...any) error {
+	ctx := context.Background()
+	
+	// Convert params to a slice of interface{}
+	args := make([]interface{}, len(params))
+	copy(args, params)
+	
+	// Execute the query with parameters
+	_, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("error executing statement: %w", err)
+	}
+	
+	return nil
+}
+
+// GetSchema returns database schema information
+func (s *sqlServerImpl) GetSchema() (interfaces.SchemaInfo, error) {
+	ctx := context.Background()
+	// We don't use schemas directly but we might in the future
+	_, err := s.getDBSchemas(ctx)
+	if err != nil {
+		return interfaces.SchemaInfo{}, fmt.Errorf("error getting schemas: %w", err)
+	}
+	
+	tables, err := s.getDBTables(ctx)
+	if err != nil {
+		return interfaces.SchemaInfo{}, fmt.Errorf("error getting tables: %w", err)
+	}
+	
+	result := interfaces.SchemaInfo{
+		DatabaseName: os.Getenv("SQL_DATABASE"),
+		Tables:       make([]interfaces.TableSchema, 0, len(tables)),
+	}
+	
+	// Collect schema information for each table
+	for _, tableName := range tables {
+		tableSchema, err := s.GetTableSchema(tableName)
+		if err != nil {
+			return interfaces.SchemaInfo{}, fmt.Errorf("error getting schema for table %s: %w", tableName, err)
+		}
+		result.Tables = append(result.Tables, tableSchema)
+	}
+	
+	return result, nil
+}
+
+// GetTables returns all table names
+func (s *sqlServerImpl) GetTables() ([]string, error) {
+	ctx := context.Background()
+	return s.getDBTables(ctx)
+}
+
+// GetTableSchema returns column information for a specific table
+func (s *sqlServerImpl) GetTableSchema(tableName string) (interfaces.TableSchema, error) {
+	ctx := context.Background()
+	
+	// Get column information from the database
+	columns, err := s.getTableColumns(ctx, tableName)
+	if err != nil {
+		return interfaces.TableSchema{}, fmt.Errorf("error getting table schema: %w", err)
+	}
+	
+	// Convert to the required format
+	result := interfaces.TableSchema{
+		TableName: tableName,
+		Columns:   make([]interfaces.ColumnInfo, 0, len(columns)),
+	}
+	
+	for _, col := range columns {
+		columnInfo := interfaces.ColumnInfo{
+			Name:     col["COLUMN_NAME"].(string),
+			Type:     col["DATA_TYPE"].(string),
+			Nullable: col["IS_NULLABLE"].(string) == "YES",
+		}
+		
+		// Handle default value if present
+		if defaultVal, ok := col["COLUMN_DEFAULT"]; ok && defaultVal != nil {
+			columnInfo.DefaultValue = defaultVal
+		}
+		
+		// Check if the column is a primary key - would need additional query
+		// This is a simplified version
+		
+		result.Columns = append(result.Columns, columnInfo)
+	}
+	
+	return result, nil
+}
+
+// getDBTables returns a list of all tables in the database
+func (s *sqlServerImpl) getDBTables(ctx context.Context) ([]string, error) {
 	query := `
 		SELECT TABLE_NAME 
 		FROM INFORMATION_SCHEMA.TABLES 
@@ -114,8 +228,8 @@ func (s *sqlServerImpl) GetTables(ctx context.Context) ([]string, error) {
 	return tables, nil
 }
 
-// GetTableSchema returns the schema of a specific table
-func (s *sqlServerImpl) GetTableSchema(ctx context.Context, tableName string) ([]map[string]any, error) {
+// getTableColumns returns the schema of a specific table
+func (s *sqlServerImpl) getTableColumns(ctx context.Context, tableName string) ([]map[string]any, error) {
 	query := `
 		SELECT 
 			COLUMN_NAME, 
@@ -128,11 +242,65 @@ func (s *sqlServerImpl) GetTableSchema(ctx context.Context, tableName string) ([
 		ORDER BY ORDINAL_POSITION
 	`
 	
-	return s.ExecuteQuery(ctx, query)
+	// Execute the query with parameters
+	rows, err := s.db.QueryContext(ctx, query, tableName)
+	if err != nil {
+		return nil, fmt.Errorf("error executing query: %w", err)
+	}
+	defer rows.Close()
+
+	// Get column names
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, fmt.Errorf("error getting column names: %w", err)
+	}
+
+	// Prepare result slice
+	var results []map[string]any
+
+	// Prepare values for scan
+	values := make([]interface{}, len(columns))
+	valuePtrs := make([]interface{}, len(columns))
+	for i := range columns {
+		valuePtrs[i] = &values[i]
+	}
+
+	// Iterate through rows
+	for rows.Next() {
+		err = rows.Scan(valuePtrs...)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning row: %w", err)
+		}
+
+		// Create a map for this row
+		row := make(map[string]any)
+		for i, col := range columns {
+			var v any
+			val := values[i]
+			
+			// Convert bytes to string if needed
+			b, ok := val.([]byte)
+			if ok {
+				v = string(b)
+			} else {
+				v = val
+			}
+			
+			row[col] = v
+		}
+		
+		results = append(results, row)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return results, nil
 }
 
-// GetSchema returns a list of all schemas in the database
-func (s *sqlServerImpl) GetSchema(ctx context.Context) ([]string, error) {
+// getDBSchemas returns a list of all schemas in the database
+func (s *sqlServerImpl) getDBSchemas(ctx context.Context) ([]string, error) {
 	query := `
 		SELECT SCHEMA_NAME 
 		FROM INFORMATION_SCHEMA.SCHEMATA 
@@ -191,8 +359,12 @@ func createConnection() (*sql.DB, error) {
 }
 
 // NewSQLServerTool creates a new instance of SQLServerTool
-func NewSQLServerTool(server *server.MCPServer) SQLServer {
-	db, err := createConnection()
+func NewSQLServerTool(server *server.MCPServer) interfaces.Database {
+	// Create a new SQL Server implementation
+	sqlServerTool := &sqlServerImpl{}
+	
+	// Connect to the database
+	err := sqlServerTool.Connect()
 	if err != nil {
 		// Log the error but continue without the tool
 		fmt.Printf("Failed to initialize SQL Server tool: %v\n", err)
@@ -200,11 +372,6 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 	}
 
 	fmt.Println("SQL Server tool initialized successfully")
-	
-	// Create a new SQL Server implementation
-	sqlServerTool := &sqlServerImpl{
-		db: db,
-	}
 	
 	// Add the SQL Server tools to the MCP server
 	if server != nil {
@@ -223,7 +390,7 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 				return mcp.NewToolResultError("query must be a string"), nil
 			}
 			
-			results, err := sqlServerTool.ExecuteQuery(ctx, query)
+			results, err := sqlServerTool.Query(query)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -269,7 +436,7 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 		)
 		
 		server.AddTool(getTablesTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			tables, err := sqlServerTool.GetTables(ctx)
+			tables, err := sqlServerTool.GetTables()
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -300,7 +467,7 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 				return mcp.NewToolResultError("table_name must be a string"), nil
 			}
 			
-			schema, err := sqlServerTool.GetTableSchema(ctx, tableName)
+			schema, err := sqlServerTool.GetTableSchema(tableName)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}
@@ -309,32 +476,19 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 			var resultText strings.Builder
 			resultText.WriteString(fmt.Sprintf("Schema for table %s:\n\n", tableName))
 			
-			if len(schema) > 0 {
-				// Get column names
-				var columns []string
-				for col := range schema[0] {
-					columns = append(columns, col)
+			// Print headers
+			resultText.WriteString("COLUMN_NAME\tDATA_TYPE\tIS_NULLABLE\tDEFAULT_VALUE\tIS_PRIMARY_KEY\n")
+			resultText.WriteString("----------\t----------\t----------\t----------\t----------\n")
+			
+			// Print data
+			for _, col := range schema.Columns {
+				defaultValue := ""
+				if col.DefaultValue != nil {
+					defaultValue = fmt.Sprintf("%v", col.DefaultValue)
 				}
 				
-				// Print headers
-				for _, col := range columns {
-					resultText.WriteString(fmt.Sprintf("%s\t", col))
-				}
-				resultText.WriteString("\n")
-				
-				// Print separator
-				for range columns {
-					resultText.WriteString("----------\t")
-				}
-				resultText.WriteString("\n")
-				
-				// Print data
-				for _, row := range schema {
-					for _, col := range columns {
-						resultText.WriteString(fmt.Sprintf("%v\t", row[col]))
-					}
-					resultText.WriteString("\n")
-				}
+				resultText.WriteString(fmt.Sprintf("%s\t%s\t%v\t%s\t%v\n", 
+					col.Name, col.Type, col.Nullable, defaultValue, col.IsPrimaryKey))
 			}
 			
 			return mcp.NewToolResultText(resultText.String()), nil
@@ -346,7 +500,8 @@ func NewSQLServerTool(server *server.MCPServer) SQLServer {
 		)
 		
 		server.AddTool(getSchemasTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-			schemas, err := sqlServerTool.GetSchema(ctx)
+			queryCtx := context.Background()
+			schemas, err := sqlServerTool.getDBSchemas(queryCtx)
 			if err != nil {
 				return mcp.NewToolResultError(err.Error()), nil
 			}

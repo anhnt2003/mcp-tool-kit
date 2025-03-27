@@ -12,26 +12,26 @@ import (
 )
 
 // Jira defines the interface for Jira operations
-type Jira interface {
-	// GetIssue retrieves a Jira issue by its key
+type JiraInterface interface {
+	// GetIssue retrieves detailed information about a specific Jira issue
 	GetIssue(ctx context.Context, issueKey string) (*jira.Issue, error)
-
+	
 	// CreateIssue creates a new Jira issue
-	CreateIssue(ctx context.Context, project, issueType, summary, description string) (*jira.Issue, error)
-
+	CreateIssue(ctx context.Context, project string, issueType string, summary string, description string) (*jira.Issue, error)
+	
 	// UpdateIssue updates an existing Jira issue
 	UpdateIssue(ctx context.Context, issueKey string, fields map[string]interface{}) (*jira.Issue, error)
-
-	// AssignIssue assigns an issue to a user
-	AssignIssue(ctx context.Context, issueKey, assignee string) error
-
-	// TransitionIssue changes the status of an issue
-	TransitionIssue(ctx context.Context, issueKey, transitionID string) error
-
-	// AddComment adds a comment to an issue
-	AddComment(ctx context.Context, issueKey, body string) (*jira.Comment, error)
-
-	// SearchIssues searches for issues using JQL
+	
+	// AssignIssue assigns a Jira issue to a user
+	AssignIssue(ctx context.Context, issueKey string, assignee string) error
+	
+	// TransitionIssue transitions an issue through its workflow
+	TransitionIssue(ctx context.Context, issueKey string, transitionID string) error
+	
+	// AddComment adds a comment to a Jira issue
+	AddComment(ctx context.Context, issueKey string, body string) (*jira.Comment, error)
+	
+	// SearchIssues searches for Jira issues using JQL
 	SearchIssues(ctx context.Context, jql string, options *jira.SearchOptions) ([]jira.Issue, error)
 }
 
@@ -122,7 +122,7 @@ func (j *jiraServiceImpl) SearchIssues(ctx context.Context, jql string, options 
 }
 
 // NewJiraTool creates a new instance of JiraTool
-func NewJiraTool(server *server.MCPServer) Jira {
+func NewJiraTool(server *server.MCPServer) JiraInterface {
 	// Create a new jira service implementation
 	jiraTool := &jiraServiceImpl{
 		client: services.InitializeAtlassianClient(),
@@ -153,11 +153,33 @@ func NewJiraTool(server *server.MCPServer) Jira {
 			}
 			
 			// Convert the issue to a formatted text result
-			return mcp.NewToolResultText(fmt.Sprintf("Issue: %s\nSummary: %s\nStatus: %s\nType: %s", 
-				issue.Key, 
-				issue.Fields.Summary, 
-				issue.Fields.Status.Name,
-				issue.Fields.Type.Name)), nil
+			return mcp.NewToolResultText(
+				fmt.Sprintf(
+					`Key: %s
+					Summary: %s
+					Status: %s
+					Type: %s
+					Assignee: %s
+					Priority: %s
+					Created: %v
+					Updated: %v
+					Reporter: %s
+					Description: %s	
+					Subtasks: %v
+					`, 
+					issue.Key, 
+					issue.Fields.Summary, 
+					issue.Fields.Status.Name,
+					issue.Fields.Type.Name,
+					issue.Fields.Assignee.DisplayName,
+					issue.Fields.Priority.Name,
+					issue.Fields.Created,
+					issue.Fields.Updated,
+					issue.Fields.Reporter.DisplayName,
+					issue.Fields.Description,
+					issue.Fields.Subtasks,
+				),
+			), nil
 		})
 		
 		// Register tool for creating a Jira issue
@@ -249,12 +271,34 @@ func NewJiraTool(server *server.MCPServer) Jira {
 			var resultText strings.Builder
 			resultText.WriteString(fmt.Sprintf("Found %d issues:\n\n", len(issues)))
 			
-			for i, issue := range issues {
-				resultText.WriteString(fmt.Sprintf("%d. %s: %s (Status: %s)\n", 
-					i+1, 
-					issue.Key, 
-					issue.Fields.Summary, 
-					issue.Fields.Status.Name))
+			for _, issue := range issues {
+				resultText.WriteString(
+					fmt.Sprintf(
+						`Key: %s
+						Summary: %s
+						Status: %s
+						Type: %s
+						Assignee: %s
+						Priority: %s
+						Created: %v
+						Updated: %v
+						Reporter: %s
+						Description: %s
+						Subtasks: %v
+						`, 
+						issue.Key, 
+						issue.Fields.Summary, 
+					    issue.Fields.Status.Name,
+						issue.Fields.Type.Name,
+						issue.Fields.Assignee.DisplayName,
+						issue.Fields.Priority.Name,
+						issue.Fields.Created,
+						issue.Fields.Updated,
+						issue.Fields.Reporter.DisplayName,
+						issue.Fields.Description,
+						issue.Fields.Subtasks,
+					),
+				)
 			}
 			
 			return mcp.NewToolResultText(resultText.String()), nil
