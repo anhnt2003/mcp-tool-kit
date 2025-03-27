@@ -36,6 +36,11 @@ SQL_DATABASE=your-database-name
 # Optional: complete connection string (will be used if provided)
 SQL_CONNECTION_STRING=Server=your-server-address;Database=your-database-name;User Id=sa;Password=YourStrongPassword!;MultipleActiveResultSets=True;TrustServerCertificate=True
 
+# Jira Configuration
+JIRA_API_KEY=your-jira-api-key
+JIRA_URL=https://your-domain.atlassian.net
+JIRA_EMAIL=your-email@domain.com
+
 # MCP Tools Configuration
 CONFIG_TOOLS=sql-server,jira
 
@@ -127,3 +132,4 @@ Retrieves all available issue statuses for a specific Jira project.
 #### jira_transition_issue
 
 Transitions an issue through its workflow using a valid transition ID.
+
