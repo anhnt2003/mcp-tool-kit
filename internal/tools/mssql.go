@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"mcp-tool-kit/internal/interfaces"
 	"os"
 	"strings"
+
+	"github.com/anhnt2003/mcp-tool-kit/internal/interfaces"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/mark3labs/mcp-go/mcp"

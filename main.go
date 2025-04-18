@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"mcp-tool-kit/internal/tools"
 	"os"
 	"strings"
 
+	"github.com/anhnt2003/mcp-tool-kit/internal/tools"
 	"github.com/joho/godotenv"
 	"github.com/mark3labs/mcp-go/server"
 )

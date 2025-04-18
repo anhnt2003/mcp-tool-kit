@@ -3,8 +3,9 @@ package tools
 import (
 	"context"
 	"fmt"
-	"mcp-tool-kit/internal/services"
 	"strings"
+
+	"github.com/anhnt2003/mcp-tool-kit/internal/services"
 
 	"github.com/andygrunwald/go-jira"
 	"github.com/mark3labs/mcp-go/mcp"

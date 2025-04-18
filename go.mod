@@ -1,4 +1,4 @@
-module mcp-tool-kit
+module github.com/anhnt2003/mcp-tool-kit
 
 go 1.23.2
 
